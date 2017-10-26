@@ -73,7 +73,6 @@ public class NettyRobot extends BaseRobot {
 		try {
 			ChannelFuture f = bootstrap.bind(PORT).sync();
 			//TODO:: 监听是否绑定成功
-			System.out.println("TCP窗口服务器已经启动！");
 		} catch (InterruptedException e) {
 			log.info("IP---端口绑定失败！"+e.toString());
 			e.printStackTrace();

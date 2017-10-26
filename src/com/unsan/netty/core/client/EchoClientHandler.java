@@ -1,5 +1,8 @@
 package com.unsan.netty.core.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.unsan.msg.LaserLight;
 import com.unsan.netty.client.ICallback;
 import com.unsan.netty.client.UnsanClient;
@@ -12,7 +15,7 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.CharsetUtil;
 
 public class EchoClientHandler extends SimpleChannelInboundHandler<Object>{
-
+	private Logger log = LoggerFactory.getLogger(getClass());
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		UnsanClient.addCtx(ctx);
@@ -20,8 +23,6 @@ public class EchoClientHandler extends SimpleChannelInboundHandler<Object>{
 	@Override
 	protected void channelRead0(ChannelHandlerContext ctx, Object msg) throws Exception {
 		LaserLight light = (LaserLight)msg;
-		System.out.println(light.getNoid()+" netty内部消息 ："+"msg:"+light.getMsg());
-		
 		ICallback callback = UnsanClient.getCallbackMap().get(light.getNoid());
 		if(callback!=null){
 			callback.callback(light);

@@ -22,18 +22,21 @@ public class NettyRobotHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		LaserLight light = (LaserLight)msg;
-		System.out.println(light.getNoid()+" netty 内部服务器 消息 "+light.getLevel()+"msg:"+light.getMsg());
+		log.debug(light.getNoid()+" netty 内部服务器 消息 "+light.getLevel()+"msg:"+light.getMsg());
 		
-		sendp = new SendMsgPers(ctx,light);
-		sendp.start();
+//		sendp = new SendMsgPers(ctx,light);
+//		sendp.start();
 		
 		light.getToRobotName();
 		
 		LaserLight ceshi = new LaserLight();
 		 ceshi.setMsg("服务器会每隔3秒发送消息--调用callback！");
-		 //数据发送出去...
+		 ceshi.setToRobotName(light.getFromRobotName());
+		 ceshi.setNoid(light.getNoid());
+		// ceshi.setToRobotName("");
+		 //数据发送出去..给平台...
 		 nettyRobot.aSend(light);
-				 
+			//另外。。告诉客户端。。发送成功..	 
 		ctx.writeAndFlush(ceshi);
 	}
 

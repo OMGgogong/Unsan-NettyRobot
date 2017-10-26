@@ -15,10 +15,10 @@ public class UnsanClientTest {
 public static void main(String[] args) {
 	UnsanClient unsanClient = new UnsanClient();
 	LaserLight sendMsg = new LaserLight();
-	sendMsg.setFromRobotName("netty");
+	//sendMsg.setFromRobotName("netty");
 	sendMsg.setToRobotName("wali");
 	sendMsg.setMsg("this is a frist msg that is came from nettyRobot to wali !");
 	
-	unsanClient.aSend(sendMsg, new UnsanCallBack());
+	unsanClient.aSend(sendMsg, new QueryCallBack());
 }
 }

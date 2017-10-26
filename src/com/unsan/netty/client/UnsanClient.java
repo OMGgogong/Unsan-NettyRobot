@@ -19,7 +19,7 @@ public class UnsanClient implements IClient{
 	private  NettyRobotClient robotClient = null;
 	private static CopyOnWriteArrayList< ChannelHandlerContext> ctxs = new CopyOnWriteArrayList<>();
 	public UnsanClient() {
-
+		Configure.loadConf();
 		robotClient = new NettyRobotClient();
 		robotClient.start();
 	}
@@ -32,13 +32,13 @@ public class UnsanClient implements IClient{
 	@Override
 	public LaserLight aSend(LaserLight msg, ICallback callback) {
 		callbackMap.put(msg.getNoid(), callback);
-		if(robotClient.isConneted.get()){
+		if(robotClient.getIsConneted().get()){
 			for(ChannelHandlerContext ctx : ctxs){
 				ctx.writeAndFlush(msg);
 				
 			}
 		}else{
-			System.out.println("链接失败！！！");
+			log.error("客户端链接失败！！！");
 		}
 		return null;
 	}

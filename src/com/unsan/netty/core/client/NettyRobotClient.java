@@ -3,6 +3,12 @@ package com.unsan.netty.core.client;
 import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.unsan.netty.client.Configure;
+import com.unsan.netty.core.client.serverSelector.BalanceSelector;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
@@ -22,15 +28,22 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
  *
  */
 public class NettyRobotClient implements Runnable{
-
-	private final String host = "127.0.0.1";
-	private final int port = 6666;
+	private Logger log = LoggerFactory.getLogger(getClass());
+	private final String host = new BalanceSelector().select(Configure.getServerHosts());
+	private final int port = Configure.getNettyServerPort();
 	
-	public   AtomicBoolean isConneted = new AtomicBoolean(false);
+	/**
+	 * 多线程下 线程安全
+	 * 该客户端的链接状态
+	 */
+	private   AtomicBoolean isConneted = new AtomicBoolean(false);
 	
-
+	/**
+	 * 此方法用到了 CAS 自旋锁
+	 * 自旋锁 是不可重入的!即：不可回调。
+	 * 
+	 */
 	public void start() {
-		
 		EventLoopGroup group = new NioEventLoopGroup();
 		 
 		Bootstrap b = new Bootstrap();
@@ -55,8 +68,7 @@ public class NettyRobotClient implements Runnable{
 				@Override
 				public void operationComplete(ChannelFuture future) throws Exception {
 					if(future.isSuccess()){
-						System.out.println("client conneted");
-						
+						log.info("客户端链接成功！");
 						
 						while(!isConneted.get()){
 							isConneted.compareAndSet(false, true);
@@ -65,8 +77,7 @@ public class NettyRobotClient implements Runnable{
 						
 						
 					}else{
-						System.out.println("server attemp failed");
-						
+						log.error("客户端链接失败！");
 						while(isConneted.get()){
 							isConneted.compareAndSet(true, false);
 							
@@ -77,7 +88,7 @@ public class NettyRobotClient implements Runnable{
 			});
 			//f.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
-			System.out.println("异常退出");
+			log.error("客户端链接异常！");
 			e.printStackTrace();
 		}
 //		finally {
@@ -102,6 +113,22 @@ public class NettyRobotClient implements Runnable{
 	@Override
 	public void run() {
 		new NettyRobotClient().start();
+	}
+
+
+	/**
+	 * 该客户端的链接状态
+	 * true表明客户端链接成功
+	 * false链接失败
+	 * @return
+	 */
+	public AtomicBoolean getIsConneted() {
+		return isConneted;
+	}
+
+
+	public void setIsConneted(AtomicBoolean isConneted) {
+		this.isConneted = isConneted;
 	}
 
 }
